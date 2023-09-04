@@ -1,7 +1,7 @@
 # XGNN
 XGNN is an attention based graph neural network architecture designed for utilize the symmetrized one electron integral molecule feature. It's highlighted by the generalization ability.
 ## Requirements
-the following python packages are used, and the environment used for experiments are provided in 'requirements.txt':、
+the following python packages are used, and the environment used for experiments are provided in 'requirements.txt':\
 numpy==1.23.5\
 pyscf==2.2.1\
 sympy==1.11.1\
