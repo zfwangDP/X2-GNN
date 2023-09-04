@@ -16,7 +16,7 @@ def mapping(mol_object):
     edge_attr = bi_gen_edge_feature_6(mat_ovlp, mat_hcore, aoslice, edge_index, mol_object.Z)
 
     return Data(x = mol_object.Z, edge_index = edge_index, edge_attr = edge_attr, y = mol_object.Label, edge_num = edge_index.size()[1],
-                  idx = mol_object.idx, atom_pos = mol_object.R)    #is_bond = is_bond, bond_type = bond_type,
+                  idx = mol_object.idx, atom_pos = mol_object.R)
 
 def paralle(mol_list):
     P = Pool(processes=int(os.cpu_count()))
