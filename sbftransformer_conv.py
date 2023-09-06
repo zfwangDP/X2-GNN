@@ -10,82 +10,10 @@ from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.typing import Adj, OptTensor, PairTensor
 from torch_geometric.utils import softmax
+from initializer import Glorot_Ortho_
 
 
 class SBFTransformerConv(MessagePassing):
-    r"""The graph transformer operator from the `"Masked Label Prediction:
-    Unified Message Passing Model for Semi-Supervised Classification"
-    <https://arxiv.org/abs/2009.03509>`_ paper
-
-    .. math::
-        \mathbf{x}^{\prime}_i = \mathbf{W}_1 \mathbf{x}_i +
-        \sum_{j \in \mathcal{N}(i)} \alpha_{i,j} \mathbf{W}_2 \mathbf{x}_{j},
-
-    where the attention coefficients :math:`\alpha_{i,j}` are computed via
-    multi-head dot product attention:
-
-    .. math::
-        \alpha_{i,j} = \textrm{softmax} \left(
-        \frac{(\mathbf{W}_3\mathbf{x}_i)^{\top} (\mathbf{W}_4\mathbf{x}_j)}
-        {\sqrt{d}} \right)
-
-    Args:
-        in_channels (int or tuple): Size of each input sample, or :obj:`-1` to
-            derive the size from the first input(s) to the forward method.
-            A tuple corresponds to the sizes of source and target
-            dimensionalities.
-        out_channels (int): Size of each output sample.
-        heads (int, optional): Number of multi-head-attentions.
-            (default: :obj:`1`)
-        concat (bool, optional): If set to :obj:`False`, the multi-head
-            attentions are averaged instead of concatenated.
-            (default: :obj:`True`)
-        beta (bool, optional): If set, will combine aggregation and
-            skip information via
-
-            .. math::
-                \mathbf{x}^{\prime}_i = \beta_i \mathbf{W}_1 \mathbf{x}_i +
-                (1 - \beta_i) \underbrace{\left(\sum_{j \in \mathcal{N}(i)}
-                \alpha_{i,j} \mathbf{W}_2 \vec{x}_j \right)}_{=\mathbf{m}_i}
-
-            with :math:`\beta_i = \textrm{sigmoid}(\mathbf{w}_5^{\top}
-            [ \mathbf{W}_1 \mathbf{x}_i, \mathbf{m}_i, \mathbf{W}_1
-            \mathbf{x}_i - \mathbf{m}_i ])` (default: :obj:`False`)
-        dropout (float, optional): Dropout probability of the normalized
-            attention coefficients which exposes each node to a stochastically
-            sampled neighborhood during training. (default: :obj:`0`)
-        edge_dim (int, optional): Edge feature dimensionality (in case
-            there are any). Edge features are added to the keys after
-            linear transformation, that is, prior to computing the
-            attention dot product. They are also added to final values
-            after the same linear transformation. The model is:
-
-            .. math::
-                \mathbf{x}^{\prime}_i = \mathbf{W}_1 \mathbf{x}_i +
-                \sum_{j \in \mathcal{N}(i)} \alpha_{i,j} \left(
-                \mathbf{W}_2 \mathbf{x}_{j} + \mathbf{W}_6 \mathbf{e}_{ij}
-                \right),
-
-            where the attention coefficients :math:`\alpha_{i,j}` are now
-            computed via:
-
-            .. math::
-                \alpha_{i,j} = \textrm{softmax} \left(
-                \frac{(\mathbf{W}_3\mathbf{x}_i)^{\top}
-                (\mathbf{W}_4\mathbf{x}_j + \mathbf{W}_6 \mathbf{e}_{ij})}
-                {\sqrt{d}} \right)
-
-            (default :obj:`None`)
-        bias (bool, optional): If set to :obj:`False`, the layer will not learn
-            an additive bias. (default: :obj:`True`)
-        root_weight (bool, optional): If set to :obj:`False`, the layer will
-            not add the transformed root node features to the output and the
-            option  :attr:`beta` is set to :obj:`False`. (default: :obj:`True`)
-        **kwargs (optional): Additional arguments of
-            :class:`torch_geometric.nn.conv.MessagePassing`.
-    """
-    _alpha: OptTensor
-
     def __init__(
         self,
         in_channels: Union[int, Tuple[int, int]],
@@ -147,6 +75,12 @@ class SBFTransformerConv(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self):
+        with torch.no_grad():
+            Glorot_Ortho_(self.lin_sbf.weight)
+            Glorot_Ortho_(self.lin_rbf.weight)
+            torch.nn.init.zeros(self.lin_sbf.bias)
+            torch.nn.init.zeros(self.lin_rbf.bias)
+
         self.lin_key.reset_parameters()
         self.lin_query.reset_parameters()
         self.lin_value.reset_parameters()
@@ -158,18 +92,6 @@ class SBFTransformerConv(MessagePassing):
 
     def forward(self, sbf, rbf, x: Union[Tensor, PairTensor], edge_index: Adj,
                 edge_attr: OptTensor = None, return_attention_weights=None):
-        #
-        # type: (Union[Tensor, PairTensor], Tensor, OptTensor, NoneType) -> Tensor  # noqa
-        # type: (Union[Tensor, PairTensor], SparseTensor, OptTensor, NoneType) -> Tensor  # noqa
-        # type: (Union[Tensor, PairTensor], Tensor, OptTensor, bool) -> Tuple[Tensor, Tuple[Tensor, Tensor]]  # noqa
-        # type: (Union[Tensor, PairTensor], SparseTensor, OptTensor, bool) -> Tuple[Tensor, SparseTensor]  # noqa
-        r"""
-        Args:
-            return_attention_weights (bool, optional): If set to :obj:`True`,
-                will additionally return the tuple
-                :obj:`(edge_index, attention_weights)`, holding the computed
-                attention weights for each edge. (default: :obj:`None`)
-        """
 
         H, C = self.heads, self.out_channels
 
@@ -184,7 +106,6 @@ class SBFTransformerConv(MessagePassing):
         key = self.lin_key(x[0]).view(-1, H, C)
         value = self.lin_value(x[0]).view(-1, H, C)
 
-        # propagate_type: (query: Tensor, key:Tensor, value: Tensor, edge_attr: OptTensor) # noqa
         out = self.propagate(edge_index, query=query, key=key, value=value,
                              edge_attr=edge_attr, sbf=sbf, size=None)
 
