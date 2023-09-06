@@ -1,5 +1,6 @@
 import torch
 import os
+import json
 import numpy as np
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
@@ -8,7 +9,7 @@ import datetime
 import time
 
 class Train_EMA:
-    def __init__(self, model, ema_model, epoches, dataset, division, optimizer, scheduler,
+    def __init__(self, model, ema_model, args, epoches, dataset, division, optimizer, scheduler,
          std, grad_clip = True, max_grad = 10.0, random_seed = 41, device = 'cuda', batch_size = 128):
         self.model = model.to(device)
         self.ema_model = ema_model
@@ -27,7 +28,7 @@ class Train_EMA:
         self.device = device
         self.std = std
         self.batch_size = batch_size
-        self.save_file = time.strftime("%Y-%m-%d-%H-%M-%S",time.localtime(time.time()))
+        self.args = args
 
     def epoch(self):
         self.model.train()
@@ -54,7 +55,6 @@ class Train_EMA:
         for data in loader:
             data = data.to(self.device)
             error += self.std*(self.ema_model(data)  - data.y ).abs().sum().item()  # MAE
-            #error += self.std*(self.model(data)  - data.y ).abs().sum().item()
         return error / len(loader.dataset)
 
     def train(self):
@@ -64,34 +64,34 @@ class Train_EMA:
         # define a log file
         num_of_run = 1
         log_file_name = 'DBGNNLogRUN'
-        log_path = os.getcwd()+'/log/'+log_file_name + str(num_of_run) + '.txt'
+        log_path = os.getcwd()+'/log/'+log_file_name + str(num_of_run) + '.log'
         format_sentence = "{time_str}[lr]:{lr:.7f}\t[epoch]:{epoch:03d}\t[Loss]:{loss:.7f}\t[ValMAE]:{val_error:.7f}\t[TestMAE]:{test_error:.7f}\n"
         while os.path.exists(log_path):
             num_of_run = num_of_run+1
-            log_path = os.getcwd()+'/log/'+log_file_name + str(num_of_run) + '.txt'
+            log_path = os.getcwd()+'/log/'+log_file_name + str(num_of_run) + '.log'
         with open(log_path,'a') as f:
             f.write(f'clip:{self.clip}\tmax_grad:{self.max_norm:.7f}\trandom_seed:{self.random_seed:03d}\tstatistics:{self.dataset.data.y.mean():.7f}\t'
                 f'training sample: {len(self.train_loader.dataset):03d}\tval_sample: {len(self.val_loader.dataset):03d}\tbatch_size:{self.batch_size:03d} \n')
         print(log_path)
         print(type(self.model))
 
+        save_dir = "./modelsaves/"+f'/{log_file_name}{str(num_of_run)}/'
+        save_file = save_dir + 'ckpt/ckpt_best.pth'
+
+        if not os.path.isdir(save_dir+'/ckpt'):
+            os.mkdir(save_dir)
+            os.mkdir(save_dir+'/ckpt')
+
+        with open(f'{save_dir}args.json','w')as f:
+            json.dump(self.args, f, indent=1)
+
         # training loop
         for epoch in range(self.epoches):
-            time_mk1 = datetime.datetime.now()
             lr = self.scheduler.optimizer.param_groups[0]['lr']
             loss = self.epoch()
-            time_mk2=datetime.datetime.now()
-            print(time_mk2-time_mk1)
             val_error = self.test(self.val_loader)
-            #test_error = self.test(self.test_loader)
-            time_mk3=datetime.datetime.now()
-            print(time_mk3-time_mk2)
-            #self.scheduler.step(val_error)
-            time_mk4=datetime.datetime.now()
-            print(time_mk4-time_mk3)
 
             # save ckpt
-            save_file = "./modelsaves/"+self.save_file+'/ckpt/ckpt_best.pth'
             if (best_val_error is None or val_error <= best_val_error):
                 best_val_error = val_error
                 if epoch > 100:
@@ -100,15 +100,10 @@ class Train_EMA:
                                     'optimizer': self.optimizer.state_dict(),
                                     'scheduler': self.scheduler.state_dict(),
                                     'epoch': epoch}
-                    if not os.path.isdir("./modelsaves/"+self.save_file+'/ckpt'):
-                        os.mkdir("./modelsaves/"+self.save_file)
-                        os.mkdir("./modelsaves/"+self.save_file+'/ckpt')
                     if os.path.isfile(save_file):
                         os.remove(save_file)
                     torch.save(checkpoint, save_file)
                     print('current ckpt epoch:%s' %epoch)
-            time_mk5=datetime.datetime.now()
-            print(time_mk5-time_mk4)
         
             # write log file per epoch
             print(f'Epoch: {epoch+1:03d}, LR: {lr:7f}, Loss: {loss:.7f}, '
