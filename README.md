@@ -1,5 +1,5 @@
-# XGNN
-XGNN is an attention based graph neural network architecture designed for utilizing the symmetrized one electron integral molecule feature. It's highlighted by the generalization ability.
+# X2-GNN
+X2-GNN is an attention based graph neural network architecture designed for utilizing the symmetrized one electron integral molecule feature. It's highlighted by the generalization ability.
 ## Requirements
 the following python packages are used, and the environment used for experiments are provided in 'requirements.txt':\
 numpy==1.23.5\
@@ -9,7 +9,7 @@ torch==1.12.1\
 torch-geometric==2.1.0\
 torch-scatter==2.1.0
 ## How to use
-the following content will help you to reproduce the results presented in XGNN paper.
+the following content will help you to reproduce the results presented in X2-GNN paper.
 ### download dataset
  simply run the notebook 'datapre.ipynb' and it will download and unzip QM9 dataset and reorganize it into a single xyz file. These files can be found in directory './raw/'. Other datasets mention in the article are also provided in this dir in xyz format.
 ### represent molecules as graph
