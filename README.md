@@ -7,7 +7,9 @@ pyscf==2.2.1\
 sympy==1.11.1\
 torch==1.12.1\
 torch-geometric==2.1.0\
-torch-scatter==2.1.0
+torch-scatter==2.1.0\
+scipy==1.10.1\
+ase==3.22.1
 ## How to use
 the following content will help you to reproduce the results presented in X2-GNN paper.
 ### download dataset
