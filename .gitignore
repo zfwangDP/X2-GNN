@@ -1,0 +1,9 @@
+results/
+SOAP/
+data/
+dimenet/
+legacy/
+log/
+processed/
+raw/*
+__pycache__/

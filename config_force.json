@@ -1,0 +1,42 @@
+{
+    "lora":false,
+    "lora_rank":16,
+
+    "conv_layers":4,
+    "sbf_dim":7,
+    "rbf_dim":16,
+    "in_channels": 128,
+    "embedding_size": 128,
+    "heads": 16,
+    "vector_irreps": "64x1e+32x2e",
+    "rbf_kernel": "bessel",
+    "cutoff": 5.0,
+    "pool_option":"mean",
+    "equi_model":false,
+    "full_grad":true,
+    "S_only":false,
+
+    "dataset":"md17",
+    "mol_name":"aspirin",
+    "pre_process":"remove_mean",
+    "batch_size": 5,
+    "shuffle":false,
+    "random_seed": 41,
+    "division":[500,1000,1000],
+    "force_weight":0.999,
+
+    "scheduler": "ReduceLROnPlateau",
+    "warmup_steps": 3000,
+    "decay_steps": 3000000,
+    "max_epoch": 1000,
+    "record_limit":50,
+    "grad_clip": true,
+    "max_grad": 100,
+    "max_lr": 1e-3,
+    "decay_rate": 1e-3,
+    "ema_decay": 0.95,
+    "reduce_factor": 0.9,
+    "patience":3,
+
+    "num_thread": 4
+}

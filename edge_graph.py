@@ -9,7 +9,7 @@ import scipy.sparse as sp
 # Outputs: edge_index in edge_graph and triplets atoms
 # deals with any directed graph.(or bidirected)
 
-def vertex_to_edge_2(edge_index, num_nodes):    
+def vertex_to_edge(edge_index, num_nodes):    
     edge_id = torch.arange(edge_index[0].size()[0])
     adj_matrix = sp.coo_matrix((torch.ones(edge_index[0].size()[0]), edge_index), (num_nodes,num_nodes)).tocsr()
     nangles = torch.from_numpy(adj_matrix[edge_index[1]].sum(1).A.T).squeeze(0)

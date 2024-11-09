@@ -43,3 +43,8 @@ def gen_bonds_mini(Dij, cutoff = 5.0):
     adj_matrix = (Dij<cutoff) & Dij.bool()
     edge_index = np.argwhere(adj_matrix)
     return edge_index
+
+def gen_bonds_upper_mini(Dij, cutoff = 5.0):
+    adjmatrix = (Dij<cutoff) & Dij.bool()
+    adjmatrix = torch.triu(adjmatrix)
+    return np.argwhere(adjmatrix)
