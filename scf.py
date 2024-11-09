@@ -1,5 +1,5 @@
 # Inputs: structrue of a molecule(str), basis set( set to sto3g), edge_index
-# OutPuts: edge_attr, including a flattened hcore matrix & ovlp_matrix, i.e : |edge| x 18
+# OutPuts: edge_attr, including a flattened hcore matrix & ovlp_matrix, i.e : |edge| x 18(STO-3G) or x 338(6-311+G(3df,2p))
 
 import numpy as np
 import pyscf
@@ -51,7 +51,7 @@ def bi_gen_edge_feature_6(mat_ovlp, mat_hcore, aoslice, edge_index, Z):
     edge_pairs = edge_index.T
     edge_attr = []
     for pair in edge_pairs:
-        atom_i, atom_j = pair   # 原子编号，可以用来索引原子序数
+        atom_i, atom_j = pair   # Atom Indices
         ao_i = aoslice[atom_i][2:]
         ao_j = aoslice[atom_j][2:]
         # slice out the ao_i x ao_j part from the matrices
@@ -66,7 +66,7 @@ def bi_gen_edge_feature_6(mat_ovlp, mat_hcore, aoslice, edge_index, Z):
         elif ij_ovlp.size() == torch.Size([9,9]):
             ij_hcore_pad[2:11,2:11] = ij_hcore
             ij_ovlp_pad[2:11,2:11] = ij_ovlp
-        elif ij_ovlp.size == torch.Size([9,39]):    # FORGET TO ADD THIS...
+        elif ij_ovlp.size() == torch.Size([9,39]):
             ij_hcore_pad[2:11,:] = ij_hcore
             ij_ovlp_pad[2:11,:] = ij_ovlp
         else:
