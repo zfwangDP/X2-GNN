@@ -19,4 +19,4 @@ the following content will help you to reproduce the results presented in X2-GNN
 ### train an energy model
  After the dataset is prepared, run 'train_ema.ipynb' and it will start training, hyperparameters are specified by a json file 'config.json'. the trainer will automatically generate log file in directory './log/'. Model checkpoint will be saved in directory './modelsaves/'
 ### load trained model
- A notebook 'load.ipynb' is provided to use model trained on QM9. In the notebook we test a trained model for U0 on curated OCELOT dataset. Other properties and dataset can be used by adjusting the config file.
+ A notebook 'load.ipynb' is provided to use model trained on QM9. In the notebook we test a trained model for U0 on curated OCELOT dataset. Other properties and dataset can be used by adjusting the config file. Another notebook "HS_test.ipynb" in "./scripts/" is provided to reproduce the results of comparison between model including both h_core and overlap and solely overlaps.
