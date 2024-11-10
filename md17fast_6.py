@@ -55,7 +55,7 @@ class F_BIMD17_6_grad(InMemoryDataset):
     
     @property
     def processed_dir(self):
-        return '/share/home/zfwang/continuous/bgnn/model/layers/processed'
+        return os.path.abspath('./processed')
 
     def download(self):
         pass 

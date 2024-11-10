@@ -75,20 +75,19 @@ class SBFTransformerConv(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self):
-        with torch.no_grad():
-            Glorot_Ortho_(self.lin_sbf.weight)
-            Glorot_Ortho_(self.lin_rbf.weight)
-            torch.nn.init.zeros(self.lin_sbf.bias)
-            torch.nn.init.zeros(self.lin_rbf.bias)
+        Glorot_Ortho_(self.lin_sbf.weight)
+        Glorot_Ortho_(self.lin_rbf.weight)
+        torch.nn.init.zeros_(self.lin_sbf.bias)
+        #torch.nn.init.zeros_(self.lin_rbf.bias)
 
-        self.lin_key.reset_parameters()
-        self.lin_query.reset_parameters()
-        self.lin_value.reset_parameters()
-        if self.edge_dim:
-            self.lin_edge.reset_parameters()
-        self.lin_skip.reset_parameters()
-        if self.beta:
-            self.lin_beta.reset_parameters()
+        #Glorot_Ortho_(self.lin_key.weight)
+        #Glorot_Ortho_(self.lin_query.weight)
+        #Glorot_Ortho_(self.lin_value.weight)
+        #if self.edge_dim:
+        #    Glorot_Ortho_(self.lin_edge.weight)
+        #Glorot_Ortho_(self.lin_skip.weight)
+        #if self.beta:
+        #    Glorot_Ortho_(self.lin_beta.weight)
 
     def forward(self, sbf, rbf, x: Union[Tensor, PairTensor], edge_index: Adj,
                 edge_attr: OptTensor = None, return_attention_weights=None):

@@ -1,7 +1,10 @@
 results/
-SOAP/
+md17/
+rmd17/
+excels/
+*.xlsx
 data/
-dimenet/
+pickles/
 legacy/
 log/
 processed/
