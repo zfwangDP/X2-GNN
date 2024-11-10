@@ -28,9 +28,10 @@ def paralle(mol_list):
     return datas
 
 class QM9_allprop(InMemoryDataset):
-    def __init__(self, root = '.', input_file = './sdfs/qm9U0_std.sdf', transform = None, pre_transform = None, pre_filter = None):
+    def __init__(self, root = '.', input_file = './sdfs/qm9U0_std.sdf', prop_len=12, transform = None, pre_transform = None, pre_filter = None):
         self.root = Path(root)
         self.input_file = input_file
+        self.prop_len = prop_len
         self.prefix = input_file.split('.')[0]
         self.suffix = input_file.split('.')[1]
         if '/' in self.input_file:
@@ -53,9 +54,9 @@ class QM9_allprop(InMemoryDataset):
     def process(self):
         assert self.suffix in ['xyz', 'extxyz'], "file type not supported"
         if self.suffix == 'xyz':
-            mol_list = read_xyz_allprop(self.input_file)
+            mol_list = read_xyz_allprop(self.input_file, prop_len=self.prop_len)
         else:
-            mol_list = read_xyz_ext(self.input_file)
+            mol_list = read_xyz_ext(self.input_file, num_properties=self.prop_len)
         datas = paralle(mol_list)
         
         torch.save(self.collate(datas),self.processed_dir +'/new_bi_' + self.prefix + '_6.pt')
@@ -66,6 +67,7 @@ if __name__=='__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input_file', type=str, default='./raw/qm9_origin.xyz')
+    parser.add_argument('--prop_len', type=int, default=12)
     args = parser.parse_args()
     start_time = datetime.datetime.now()
 
@@ -92,6 +94,6 @@ if __name__=='__main__':
         if t in ForkingPickler._extra_reducers:
             del ForkingPickler._extra_reducers[t]
             
-    dataset = QM9_allprop(input_file=f'{args.input_file}')
+    dataset = QM9_allprop(input_file=f'{args.input_file}', prop_len=args.prop_len)
     end_time = datetime.datetime.now()
     print(f'time consumed: {-(start_time - end_time).total_seconds() :.2f}')
