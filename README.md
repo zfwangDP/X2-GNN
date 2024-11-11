@@ -13,7 +13,7 @@ ase==3.22.1
 ## How to use
 the following content will help you to reproduce the results presented in X2-GNN paper.
 ### download dataset
- All datasets used in this research is provided in Figshare: https://figshare.com/articles/dataset/X2-GNN_data/25848238. Download and copy them into "./raw/" and run infer scripts. these datasets are also providedin .xyz or .extxyz(supported by ASE) format.
+ All datasets used in this research is provided in Figshare: https://figshare.com/articles/dataset/X2-GNN_data/25848238. Download and copy them into "./raw/" and run infer scripts. these datasets are either provided in .xyz or .extxyz(supported by ASE) format.
 ### represent molecules as graph
  The graph representation of molecules and calculation of integrals are handled by 'qm9_allprop.py'. It stores the obtaining results in torch_geometric 'Data' objects and forms an 'InMemoryDataset' object. The processed dataset will be stored at './processed/'. To use deffirent dataset, just specify the corresponding input xyz/extxyz file.
 ### train an energy model
