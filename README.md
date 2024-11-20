@@ -15,7 +15,7 @@ the following content will help you to reproduce the results presented in X2-GNN
 ### download dataset
  All datasets used in this research is provided in Figshare: https://figshare.com/articles/dataset/X2-GNN_data/25848238. Download and copy them into "./raw/" and run infer scripts. these datasets are either provided in .xyz or .extxyz(supported by ASE) format.
 ### represent molecules as graph
- The graph representation of molecules and calculation of integrals are handled by 'qm9_allprop.py'. It stores the obtaining results in torch_geometric 'Data' objects and forms an 'InMemoryDataset' object. The processed dataset will be stored at './processed/'. To use deffirent dataset, just specify the corresponding input xyz/extxyz file.
+ The graph representation of molecules and calculation of integrals are handled by 'qm9_allprop.py'. It stores the obtained results in torch_geometric 'Data' objects and forms an 'InMemoryDataset' object. The processed dataset will be stored at './processed/'. To use custum dataset, just specify the corresponding input xyz/extxyz file.
 ### train an energy model
  After the dataset is prepared, a training script 'train_ema.py' is provided. hyperparameters are specified by a json file 'config.json'. the trainer will automatically generate log file in directory './log/'. Model checkpoint will be saved in directory './modelsaves/'
 ### load trained model
